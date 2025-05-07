@@ -5,13 +5,13 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"     # daily sync with upstream (optional)
+    - cron: "0 3 * * *"     # daily sync with upstream
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4          # your repo
+      - uses: actions/checkout@v4
 
       - name: Install Helm
         uses: azure/setup-helm@v3
@@ -21,6 +21,9 @@ jobs:
       - name: Fetch upstream chart
         run: |
           git clone --depth 1 https://github.com/openreplay/openreplay.git
+          # make sure the parent dir exists (Git ignores empty dirs)
+          mkdir -p charts
+          # copy the upstream chart in; trailing slash keeps only the contents
           rsync -a --delete \
             openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
 
