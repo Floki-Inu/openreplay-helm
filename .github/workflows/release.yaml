@@ -1,0 +1,42 @@
+name: Package & publish Helm chart
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"     # daily sync with upstream (optional)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4          # your repo
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.14.4
+
+      - name: Fetch upstream chart
+        run: |
+          git clone --depth 1 https://github.com/openreplay/openreplay.git
+          rsync -a --delete \
+            openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
+
+      - name: Build dependencies & package
+        run: |
+          helm dependency update charts/openreplay
+          mkdir -p docs
+          helm package charts/openreplay --destination docs
+
+      - name: Re-generate repo index
+        run: |
+          helm repo index docs \
+            --url https://floki-inu.github.io/openreplay-helm
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs
