@@ -30,13 +30,10 @@ jobs:
       - name: Copy upstream default values
         run: |
           cp openreplay/scripts/helmcharts/vars.yaml charts/openreplay/values.yaml
-
-          # enable ingress-nginx sub-chart
           yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
-
-          # ← NEW: make sure the webhook patch NetworkPolicy flag exists
-          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' \
-              charts/openreplay/values.yaml
+          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' charts/openreplay/values.yaml
+          # --- NEW: make ORSecureAccess an actual boolean
+          yq -i '.global.ORSecureAccess = false' charts/openreplay/values.yaml
 
       - name: Patch alerts template (quote randAlphaNum)
         run: |
@@ -45,17 +42,9 @@ jobs:
             's/\{\{[[:space:]]*randAlphaNum[[:space:]]*20[[:space:]]*\}\}/{{ randAlphaNum 20 | quote }}/g' \
             charts/openreplay/charts/alerts/templates/deployment.yaml
 
-      - name: Bump chart version to force new .tgz
+      - name: Set chart version to 0.1.${{ github.run_number }}
         run: |
-          # read current semver (e.g. 0.1.0), bump the patch part
-          ver=$(yq '.version' charts/openreplay/Chart.yaml)
-          major=$(cut -d. -f1 <<<"$ver")
-          minor=$(cut -d. -f2 <<<"$ver")
-          patch=$(cut -d. -f3 <<<"$ver")
-          new_patch=$((patch + 1))
-          new_ver="${major}.${minor}.${new_patch}"
-          yq -i ".version = \"${new_ver}\"" charts/openreplay/Chart.yaml
-          echo "🔖 bumped chart version to ${new_ver}"
+          yq -i '.version = "0.1.${{ github.run_number }}"' charts/openreplay/Chart.yaml
 
       - name: Build dependencies & package
         run: |
