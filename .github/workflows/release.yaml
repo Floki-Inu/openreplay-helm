@@ -28,13 +28,15 @@ jobs:
             --exclude 'charts/alerts' \
             openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
 
-      - name: Quote any randAlphaNum usage in keys
+      - name: Quote any randAlphaNum that appears in a YAML key
         run: |
-          # Find every template file that still contains '{{ randAlphaNum <n> }}'
-          # and quote it so the rendered YAML is valid.
-          grep -rl --include='*.yaml' -e '{{[[:space:]]*randAlphaNum' charts/openreplay \
-          | xargs -r sed -Ei \
-              's/\{\{[[:space:]]*randAlphaNum[[:space:]]+[0-9]+[[:space:]]*\}\}/{{ randAlphaNum 20 | quote }}/g'
+          # Look through every YAML template that still contains 'randAlphaNum'
+          # and quote the call so it becomes a *value*, not a map key.
+          # We replace the whole {{ ... }} block with a quoted version.
+          find charts/openreplay -name '*.yaml' -print0 \
+          | xargs -0 perl -0777 -pe '
+              s/\{\{[^\}]*?randAlphaNum[^\}]*?\}\}/"{{ randAlphaNum 20 | quote }}"/gs
+          ' -i
 
       - name: Copy upstream default values
         run: |
