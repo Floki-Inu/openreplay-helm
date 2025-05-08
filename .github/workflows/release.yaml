@@ -27,6 +27,14 @@ jobs:
           rsync -a --delete \
             openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
 
+      - name: Copy upstream default values
+        run: |
+          # put the upstream vars.yaml in place as this chart's values.yaml
+          cp openreplay/scripts/helmcharts/vars.yaml \
+             charts/openreplay/values.yaml
+          # make sure ingress-nginx is ON by default
+          yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
+
       - name: Patch alerts template (quote randAlphaNum)
         run: |
           # quote ANY '{{randAlphaNum 20}}' variant (spaces or not)
