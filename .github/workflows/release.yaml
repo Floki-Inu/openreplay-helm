@@ -29,11 +29,14 @@ jobs:
 
       - name: Copy upstream default values
         run: |
-          # put the upstream vars.yaml in place as this chart's values.yaml
-          cp openreplay/scripts/helmcharts/vars.yaml \
-             charts/openreplay/values.yaml
-          # make sure ingress-nginx is ON by default
+          cp openreplay/scripts/helmcharts/vars.yaml charts/openreplay/values.yaml
+
+          # enable ingress-nginx sub-chart
           yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
+
+          # ← NEW: make sure the webhook patch NetworkPolicy flag exists
+          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' \
+              charts/openreplay/values.yaml
 
       - name: Patch alerts template (quote randAlphaNum)
         run: |
