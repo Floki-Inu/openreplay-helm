@@ -28,13 +28,20 @@ jobs:
             --exclude 'charts/alerts' \
             openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
 
+      - name: Quote any randAlphaNum usage in keys
+        run: |
+          # Find every template file that still contains '{{ randAlphaNum <n> }}'
+          # and quote it so the rendered YAML is valid.
+          grep -rl --include='*.yaml' -e '{{[[:space:]]*randAlphaNum' charts/openreplay \
+          | xargs -r sed -Ei \
+              's/\{\{[[:space:]]*randAlphaNum[[:space:]]+[0-9]+[[:space:]]*\}\}/{{ randAlphaNum 20 | quote }}/g'
+
       - name: Copy upstream default values
         run: |
           cp openreplay/scripts/helmcharts/vars.yaml charts/openreplay/values.yaml
-          yq -i '.alerts.enabled = false' charts/openreplay/values.yaml          # ← NEW
           yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
-          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' charts/openreplay/values.yaml
           yq -i '.ingress-nginx.controller.networkPolicy.enabled = false' charts/openreplay/values.yaml
+          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' charts/openreplay/values.yaml
           yq -i '.ingress-nginx.podSecurityPolicy.enabled = false' charts/openreplay/values.yaml
           yq -i '.global.ORSecureAccess = false' charts/openreplay/values.yaml
           yq -i '.migrationJob.podAnnotations = {}' charts/openreplay/values.yaml
