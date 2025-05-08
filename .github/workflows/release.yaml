@@ -31,13 +31,23 @@ jobs:
         run: |
           cp openreplay/scripts/helmcharts/vars.yaml charts/openreplay/values.yaml
 
+          # keep ingress-nginx on
           yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
+
+          # admission-webhook patch NetworkPolicy
           yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' charts/openreplay/values.yaml
+
+          # default-backend PSP and other bits
           yq -i '.ingress-nginx.podSecurityPolicy.enabled = false' charts/openreplay/values.yaml
+
+          # ORSecureAccess boolean
           yq -i '.global.ORSecureAccess = false' charts/openreplay/values.yaml
 
-          # ---- give migrationJob an empty annotations map so .podAnnotations is never nil
+          # migration Job wants an annotations map
           yq -i '.migrationJob.podAnnotations = {}' charts/openreplay/values.yaml
+
+          # controller-level NetworkPolicy gate
+          yq -i '.ingress-nginx.controller.networkPolicy.enabled = false' charts/openreplay/values.yaml
 
       - name: Patch alerts template (quote randAlphaNum)
         run: |
