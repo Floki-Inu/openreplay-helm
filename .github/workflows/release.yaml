@@ -33,6 +33,18 @@ jobs:
             's/{{ *randAlphaNum *20 *}}/{{ randAlphaNum 20 | quote }}/g' \
             charts/openreplay/charts/alerts/templates/deployment.yaml
 
+      - name: Bump chart version to force new .tgz
+        run: |
+          # read current semver (e.g. 0.1.0), bump the patch part
+          ver=$(yq '.version' charts/openreplay/Chart.yaml)
+          major=$(cut -d. -f1 <<<"$ver")
+          minor=$(cut -d. -f2 <<<"$ver")
+          patch=$(cut -d. -f3 <<<"$ver")
+          new_patch=$((patch + 1))
+          new_ver="${major}.${minor}.${new_patch}"
+          yq -i ".version = \"${new_ver}\"" charts/openreplay/Chart.yaml
+          echo "🔖 bumped chart version to ${new_ver}"
+
       - name: Build dependencies & package
         run: |
           helm dependency update charts/openreplay
