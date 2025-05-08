@@ -31,18 +31,13 @@ jobs:
         run: |
           cp openreplay/scripts/helmcharts/vars.yaml charts/openreplay/values.yaml
 
-          # keep the sub-chart on
           yq -i '.ingress-nginx.enabled = true' charts/openreplay/values.yaml
-
-          # admission webhook patch NetworkPolicy flag we added earlier
-          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' \
-              charts/openreplay/values.yaml
-
-          # ORSecureAccess boolean we added earlier
+          yq -i '.ingress-nginx.controller.admissionWebhooks.patch.networkPolicy.enabled = false' charts/openreplay/values.yaml
+          yq -i '.ingress-nginx.podSecurityPolicy.enabled = false' charts/openreplay/values.yaml
           yq -i '.global.ORSecureAccess = false' charts/openreplay/values.yaml
 
-          # --- NEW: disable PSP objects so the template condition is defined
-          yq -i '.ingress-nginx.podSecurityPolicy.enabled = false' charts/openreplay/values.yaml
+          # ---- give migrationJob an empty annotations map so .podAnnotations is never nil
+          yq -i '.migrationJob.podAnnotations = {}' charts/openreplay/values.yaml
 
       - name: Patch alerts template (quote randAlphaNum)
         run: |
