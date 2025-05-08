@@ -29,8 +29,9 @@ jobs:
 
       - name: Patch alerts template (quote randAlphaNum)
         run: |
-          sed -i \
-            's/{{ *randAlphaNum *20 *}}/{{ randAlphaNum 20 | quote }}/g' \
+          # quote ANY '{{randAlphaNum 20}}' variant (spaces or not)
+          sed -Ei \
+            's/{{[[:space:]]*randAlphaNum[[:space:]]*20[[:space:]]*}}/{{ randAlphaNum 20 | quote }}/g' \
             charts/openreplay/charts/alerts/templates/deployment.yaml
 
       - name: Bump chart version to force new .tgz
