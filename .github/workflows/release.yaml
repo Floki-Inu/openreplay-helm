@@ -25,6 +25,7 @@ jobs:
           mkdir -p charts
           # copy the upstream chart in; trailing slash keeps only the contents
           rsync -a --delete \
+            --exclude 'charts/alerts' \
             openreplay/scripts/helmcharts/openreplay/ charts/openreplay/
 
       - name: Copy upstream default values
