@@ -17,10 +17,16 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.14.4
+      
+      - name: Download templater
+        run: |
+          curl https://i.jpillora.com/rjshrjndrn/templater! | bash
 
       - name: Fetch upstream chart
         run: |
           git clone --depth 1 https://github.com/openreplay/openreplay.git
+          # overwrite the randAlphaNum to a random string matching the criteria
+          templater -i openreplay/scripts/helmcharts/vars.yaml -o openreplay/scripts/helmcharts/vars.yaml
           # make sure the parent dir exists (Git ignores empty dirs)
           mkdir -p charts
           # copy the upstream chart in; trailing slash keeps only the contents
