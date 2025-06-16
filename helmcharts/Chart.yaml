@@ -1,0 +1,9 @@
+apiVersion: v2
+name: openreplay
+description: OpenReplay is an open-source session replay stack for web applications.
+type: application
+version: 1.0.0
+dependencies:
+  - name: openreplay
+    version: 0.1.61
+    repository: https://floki-inu.github.io/openreplay-helm

@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-database
+  namespace: openreplay
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 0 # Don't restart failing containers
+  template:
+    spec:
+      containers:
+      - name: postgresql
+        image: bitnami/postgresql:latest
+        command: ["sh", "-c"]
+        args:
+          - |
+            createdb -h floki-postgres-proxy.proxy-cxcmjcdf61fa.us-east-1.rds.amazonaws.com -U postgres openreplay || true
+        envFrom:
+          - secretRef:
+              name: postgres-url
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+      restartPolicy: Never
