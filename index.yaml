@@ -3,7 +3,7 @@ entries:
   openreplay:
   - apiVersion: v2
     appVersion: v1.22.0
-    created: "2025-11-13T03:25:15.34798651Z"
+    created: "2025-11-14T03:24:28.843095933Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -18,10 +18,10 @@ entries:
       repository: file://charts/connector
       version: 0.1.1
     description: A Helm chart for Kubernetes
-    digest: bb7b5055a6deddd25cc2c1c78fe416a6df99a5cef516df8791bd6d2afef76078
+    digest: 5c3ee2ca737e4fdd819492b3cefe2b74f7cfabf57dea6a117b54a926303ebd94
     name: openreplay
     type: application
     urls:
-    - https://floki-inu.github.io/openreplay-helm/openreplay-0.1.211.tgz
-    version: 0.1.211
-generated: "2025-11-13T03:25:15.33401904Z"
+    - https://floki-inu.github.io/openreplay-helm/openreplay-0.1.212.tgz
+    version: 0.1.212
+generated: "2025-11-14T03:24:28.827963045Z"
